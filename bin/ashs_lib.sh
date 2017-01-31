@@ -1,4 +1,4 @@
-#!/bin/bash - 
+#!/bin/bash -
 
 #######################################################################
 #
@@ -6,7 +6,7 @@
 #  Module:    $Id$
 #  Language:  BASH Shell Script
 #  Copyright (c) 2012 Paul A. Yushkevich, University of Pennsylvania
-#  
+#
 #  This file is part of ASHS
 #
 #  ASHS is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details. 
+#  GNU General Public License for more details.
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -84,7 +84,7 @@ function qsubmit_sync()
   fi
 }
 
-# Submit an array of jobs parameterized by a single parameter. The parameter is passed in 
+# Submit an array of jobs parameterized by a single parameter. The parameter is passed in
 # to the job after all other positional parameters
 function qsubmit_single_array()
 {
@@ -113,7 +113,7 @@ function qsubmit_single_array()
 }
 
 
-# Submit an array of jobs parameterized by a single parameter. The parameter is passed in 
+# Submit an array of jobs parameterized by a single parameter. The parameter is passed in
 # to the job after all other positional parameters
 function qsubmit_double_array()
 {
@@ -145,7 +145,7 @@ function qsubmit_double_array()
 }
 
 
-      
+
 
 
 
@@ -177,7 +177,7 @@ function qsubmit_array()
 }
 
 # Wait for qsub to finish
-function qwait() 
+function qwait()
 {
   if [[ $ASHS_USE_QSUB ]]; then
     qsub -b y -sync y -j y -o /dev/null -cwd -hold_jid "$1" /bin/sleep 1
@@ -185,14 +185,14 @@ function qwait()
 }
 
 # Report the version number
-function vers() 
+function vers()
 {
   ASHS_VERSION_SVN=$(cat $ASHS_ROOT/bin/ashs_version.txt)
   echo $ASHS_VERSION_SVN
 }
 
-# This function aligns the T1 and T2 images together. It takes two parameters: the 
-# path to a directory containing images mprage.nii.gz and tse.nii.gz, and a path to 
+# This function aligns the T1 and T2 images together. It takes two parameters: the
+# path to a directory containing images mprage.nii.gz and tse.nii.gz, and a path to
 # the directory where the output of the registration is stored.
 function ashs_align_t1t2()
 {
@@ -200,7 +200,7 @@ function ashs_align_t1t2()
   WFSL=${2?}
 
   if [[ -f $WFSL/flirt_t2_to_t1_ITK.txt && $ASHS_SKIP_RIGID ]]; then
-    
+
     echo "Skipping Rigid Registration"
 
   else
@@ -259,7 +259,7 @@ function ashs_ants_pairwise()
 
       # T1 has a zero weight
       local ANTS_METRIC_TERM="-m PR[tse_to_chunktemp_${side}.nii.gz,$TDIR/tse_to_chunktemp_${side}.nii.gz,1,4]"
-      
+
     else
 
       # T1 has non-zero weight
@@ -268,7 +268,7 @@ function ashs_ants_pairwise()
         "-m PR[mprage_to_chunktemp_${side}.nii.gz,$TDIR/mprage_to_chunktemp_${side}.nii.gz,$ASHS_PAIRWISE_ANTS_T1_WEIGHT,4] \
          -m PR[tse_to_chunktemp_${side}.nii.gz,$TDIR/tse_to_chunktemp_${side}.nii.gz,$T2WGT,4] \
          --use-all-metrics-for-convergence"
-    fi 
+    fi
 
     ANTS 3 \
       -x tse_to_chunktemp_${side}_regmask.nii.gz $ANTS_METRIC_TERM -o $WREG/antsreg.nii.gz \
@@ -306,7 +306,7 @@ function ashs_ants_pairwise()
   then
 
     echo "Skipping reslicing into native space"
-  
+
   else
 
     # Create a composite warp from atlas to target image (temporary)
@@ -357,7 +357,7 @@ function ashs_ants_pairwise()
 
 # This function performs what
 
-# This function maps histogram-corrected whole-brain images into the 
+# This function maps histogram-corrected whole-brain images into the
 # reference space of the template. Parameters are the atlas directory
 # containing the input images, and the atlas directory
 function ashs_reslice_to_template()
@@ -391,7 +391,7 @@ function ashs_reslice_to_template()
       # Map the image to the target space
       WarpImageMultiTransform 3 $ASHS_WORK/mprage_histmatch.nii.gz \
         $ASHS_WORK/mprage_to_chunktemp_${side}.nii.gz -R $REFSPACE \
-        $WANT/ants_t1_to_tempWarp.nii $WANT/ants_t1_to_tempAffine.txt 
+        $WANT/ants_t1_to_tempWarp.nii $WANT/ants_t1_to_tempAffine.txt
 
       # Create a custom mask for the ASHS_TSE image
       c3d $ASHS_WORK/tse_to_chunktemp_${side}.nii.gz -verbose -pim r -thresh 0.001% inf 1 0 \
@@ -405,14 +405,14 @@ function ashs_reslice_to_template()
         -R $ASHS_WORK/tse.nii.gz -i $WFSL/flirt_t2_to_t1_ITK.txt \
         -i $WANT/ants_t1_to_tempAffine.txt $WANT/ants_t1_to_tempInverseWarp.nii.gz
 
-      # Create a native-space chunk of the ASHS_TSE image 
+      # Create a native-space chunk of the ASHS_TSE image
       WarpImageMultiTransform 3 $ASHS_WORK/tse_to_chunktemp_${side}_regmask.nii.gz \
         $TMPDIR/natmask.nii.gz -R $ASHS_WORK/tse.nii.gz $TMPDIR/ants_t2_to_temp_fullInverseWarp.nii.gz
 
-      # Notice that we pad a little in the z-direction. This is to make sure that we get all the 
+      # Notice that we pad a little in the z-direction. This is to make sure that we get all the
       # slices in the image, otherwise there will be problems with the voting code.
       c3d $TMPDIR/natmask.nii.gz -thresh 0.5 inf 1 0 -trim 0x0x2vox $ASHS_WORK/tse.nii.gz \
-        -reslice-identity -o $ASHS_WORK/tse_native_chunk_${side}.nii.gz 
+        -reslice-identity -o $ASHS_WORK/tse_native_chunk_${side}.nii.gz
 
     fi
 
@@ -430,7 +430,7 @@ function ashs_reslice_to_template()
   done
 }
 
-# This function call the label fusion command given the set of training images, the id of the 
+# This function call the label fusion command given the set of training images, the id of the
 # subject to segment, the side, and the output filename
 function ashs_label_fusion()
 {
@@ -541,7 +541,7 @@ BLOCK1
 	fi
 
 	# Perform AdaBoost correction. In addition to outputing the corrected segmentation,
-  # we output posterior probabilities for each label. 
+  # we output posterior probabilities for each label.
   for kind in usegray nogray; do
 
     # The part of the command that's different for the usegray and nogray modes
@@ -554,8 +554,8 @@ BLOCK1
       -op $TDIR/fusion/posterior_corr_${kind}_${side}_%03d.nii.gz
 
   done
-  
-  # If there are reference segs, we have to repeat this again, but with heuristics from 
+
+  # If there are reference segs, we have to repeat this again, but with heuristics from
   # the reference segmentations. This allows us to make a more fair comparison
   if [[ $ASHS_HEURISTICS && -f $ASHS_WORK/refseg/refseg_${side}.nii.gz ]]; then
 
@@ -627,10 +627,11 @@ function ashs_atlas_build_template()
   if [[ -f atlastemplate.nii.gz && $ASHS_SKIP_ANTS ]]; then
     echo "Skipping template building"
   else
-    export ANTSPATH=$ASHS_ANTS/
+    export ANTSPATH=/opt/ants
+    #export ANTSPATH=$ASHS_ANTS/
     export ANTS_QSUB_OPTS=$QOPTS
     buildtemplateparallel.sh -d 3 -o atlas -m ${ASHS_TEMPLATE_ANTS_ITER?} -r 1 -t GR -s CC $CMDLINE
-    
+
     # Compress the warps
     for id in ${ATLAS_ID[*]}; do
       shrink_warp 3 atlas${id}_mprageWarp.nii.gz atlas${id}_mprageWarp.nii.gz
@@ -706,7 +707,7 @@ function ashs_atlas_build_template()
 # Resample all atlas images to the template
 function ashs_atlas_resample_tse_to_template()
 {
-  # Now resample each atlas to the template ROI chunk, setting up for n-squared 
+  # Now resample each atlas to the template ROI chunk, setting up for n-squared
   # registration.
   for ((i=0;i<$N;i++)); do
     id=${ATLAS_ID[i]}
@@ -778,7 +779,7 @@ function ashs_atlas_organize_final()
     # Copy the stuff we need into the atlas directory
     for side in left right; do
 
-      # Copy the images 
+      # Copy the images
       cp -av \
         $IDIR/tse_native_chunk_${side}.nii.gz \
         $IDIR/tse_native_chunk_${side}_seg.nii.gz \
@@ -790,11 +791,11 @@ function ashs_atlas_organize_final()
 
       # Copy the transformation to the template space. We only care about
       # the part of this transformation that involves the template, to we
-      # can save a little space here. 
+      # can save a little space here.
       c3d $IDIR/mprage_to_chunktemp_${side}.nii.gz -popas REF \
         -mcs $IDIR/ants_t1_to_temp/ants_t1_to_tempWarp.nii.gz \
         -foreach -insert REF 1 -reslice-identity -info -endfor \
-        -omc $ODIR/ants_t1_to_chunktemp_${side}Warp.nii.gz 
+        -omc $ODIR/ants_t1_to_chunktemp_${side}Warp.nii.gz
 
     done
 
@@ -830,7 +831,7 @@ function ashs_atlas_organize_final()
   # Generate a brain mask for the template
   export FSLOUTPUTTYPE=NIFTI_GZ
   cd $FINAL/template
-  bet2 template.nii.gz template_bet -m -v 
+  bet2 template.nii.gz template_bet -m -v
 }
 
 
@@ -924,7 +925,7 @@ function ashs_atlas_organize_xval()
       for tid in $TRAIN; do
         for side in left right; do
 
-          local tdir=$XVSUBJ/multiatlas/tseg_${side}_train$(printf %03d $myidx)  
+          local tdir=$XVSUBJ/multiatlas/tseg_${side}_train$(printf %03d $myidx)
           mkdir -p $tdir
 
           local sdir=$MYATL/pairwise/tseg_${side}_train${tid}
@@ -1025,7 +1026,7 @@ function ashs_atlas_adaboost_train()
   # Training needs to be performed separately for the cross-validation experiments and for the actual atlas
   # building. We will do this all in one go to simplify the code. We create BASH arrays for the train/test
   local NXVAL=0
-  if [[ -f $ASHS_XVAL ]]; then 
+  if [[ -f $ASHS_XVAL ]]; then
     NXVAL=$(cat $ASHS_XVAL | wc -l)
   fi
 
@@ -1073,7 +1074,7 @@ function ashs_atlas_adaboost_train()
     done
   done
 
-  # Wait for all the segmentations to finish  
+  # Wait for all the segmentations to finish
   qwait "ashs_lf_*_loo_*"
 
   # Now perform the training
@@ -1094,8 +1095,8 @@ function ashs_atlas_adaboost_train()
 
       # Count the unique labels in the dataset. Note that for label 0 we perform the dilation to estimate
       # the actual number of background voxels
-      for fn in $(cat truthlist.txt); do 
-        c3d $fn -dup -lstat; 
+      for fn in $(cat truthlist.txt); do
+        c3d $fn -dup -lstat;
       done | awk '$1 ~ /[0-9]+/ && $1 > 0 { h[$1]+=$6; h[0]+=$6 } END {for (q in h) print q,h[q] }' | sort -n > counts.txt
 
       # For each label, launch the training job. The number of samples is scaled to have roughly 1000 per label
@@ -1111,7 +1112,7 @@ function ashs_atlas_adaboost_train()
     done
   done
 
-  # Wait for the training to finish  
+  # Wait for the training to finish
   qwait "ashs_bl_*"
 
 }
@@ -1152,7 +1153,7 @@ function ashs_check_train()
         for kind in \
           tse_native_chunk_${side} mprage_to_chunktemp_${side} \
           tse_to_chunktemp_${side} tse_to_chunktemp_${side}_regmask \
-          seg_${side} 
+          seg_${side}
         do
           if [[ ! -f atlas/$id/${kind}.nii.gz ]]; then
             echo "STAGE $STAGE: missing file atlas/$id/${kind}.nii.gz"
@@ -1186,7 +1187,7 @@ function ashs_check_train()
 
   # Cross-validation
   local NXVAL=0
-  if [[ -f $ASHS_XVAL ]]; then 
+  if [[ -f $ASHS_XVAL ]]; then
     NXVAL=$(cat $ASHS_XVAL | wc -l)
   fi
 
@@ -1238,7 +1239,7 @@ function ashs_check_train()
         done
 
       done
-    done 
+    done
 
   fi
 
