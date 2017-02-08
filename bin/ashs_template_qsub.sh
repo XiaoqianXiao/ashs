@@ -7,7 +7,7 @@
 #  Module:    $Id$
 #  Language:  BASH Shell Script
 #  Copyright (c) 2012 Paul A. Yushkevich, University of Pennsylvania
-#  
+#
 #  This file is part of ASHS
 #
 #  ASHS is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details. 
+#  GNU General Public License for more details.
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -54,7 +54,7 @@ if [[ $ASHS_MPRAGE -nt $ASHS_WORK/mprage.nii.gz ]]; then
 fi
 
 if [[ $ASHS_TSE -nt $ASHS_WORK/tse.nii.gz ]]; then
-  c3d $ASHS_TSE -type ushort -o $ASHS_WORK/tse.nii.gz 
+  c3d $ASHS_TSE -type ushort -o $ASHS_WORK/tse.nii.gz
 fi
 
 # Histogram match the images to a reference image (used later down the road, but better to do it now)
@@ -89,7 +89,7 @@ else
     -fsl2ras -oitk $WAFF/flirt_t1_to_template_ITK.txt
 
   # Try using ANTS
-	ANTS 3 -m MI[$TEMP_T1_FULL,$ASHS_WORK/mprage.nii.gz,1,32] -o $WAFF/antsaffineonly.nii.gz -i 0 
+	ANTS 3 -m MI[$TEMP_T1_FULL,$ASHS_WORK/mprage.nii.gz,1,32] -o $WAFF/antsaffineonly.nii.gz -i 0
 	WarpImageMultiTransform 3 $ASHS_WORK/mprage.nii.gz $WAFF/test_ants_affine.nii.gz \
 		-R $TEMP_T1_FULL $WAFF/antsaffineonlyAffine.txt
 
@@ -111,7 +111,7 @@ if [[ $ASHS_SKIP_ANTS \
   && -f $WANT/ants_t1_to_tempInverseWarp.nii ]]; then
 
     echo "SKIPPING ANTS"
-  
+
 else
 
     ANTS 3 -m PR[$TEMP_T1_FULL,$ASHS_WORK/mprage.nii.gz,1,4] \
@@ -119,7 +119,7 @@ else
       -o $WANT/ants_t1_to_temp.nii \
       -a $WAFF/t1_to_template_ITK.txt \
       -i ${ASHS_TEMPLATE_ANTS_ITER} -v | tee $WANT/ants_output.txt
-  
+
     shrink_warp 3 $WANT/ants_t1_to_tempWarp.nii.gz $WANT/ants_t1_to_tempWarp.nii.gz
     shrink_warp 3 $WANT/ants_t1_to_tempInverseWarp.nii.gz $WANT/ants_t1_to_tempInverseWarp.nii.gz
 
@@ -130,7 +130,7 @@ WarpImageMultiTransform 3 $ASHS_WORK/mprage.nii.gz \
   $WANT/reslice_mprage_to_template.nii.gz -R $TEMP_T1_FULL \
   $WANT/ants_t1_to_tempWarp.nii $WANT/ants_t1_to_tempAffine.txt
 
-# Apply the transformation to the T2 image 
+# Apply the transformation to the T2 image
 WarpImageMultiTransform 3 $ASHS_WORK/tse.nii.gz $WANT/reslice_tse_to_template.nii.gz -R $TEMP_T1_FULL \
   $WANT/ants_t1_to_tempWarp.nii $WANT/ants_t1_to_tempAffine.txt $WFSL/flirt_t2_to_t1_ITK.txt
 
@@ -148,7 +148,7 @@ if [[ -f $ASHS_REFSEG_RIGHT && -f $ASHS_REFSEG_LEFT ]]; then
 
       c3d $ASHS_WORK/tse_native_chunk_${side}.nii.gz $ASHS_WORK/refseg/refseg_${side}.nii.gz \
         -int 0 -reslice-identity -type short -o $ASHS_WORK/refseg/refseg_native_chunk_${side}.nii.gz
-    
+
       mkdir -p $ASHS_WORK/refseg/heurex
       subfield_slice_rules $ASHS_WORK/refseg/refseg_native_chunk_${side}.nii.gz \
         $ASHS_HEURISTICS $ASHS_WORK/refseg/heurex/heurex_${side}_%04d.nii.gz

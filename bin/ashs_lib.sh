@@ -215,6 +215,8 @@ function ashs_align_t1t2()
     # Reslice T1 into space of T2 chunk
     c3d $TMPDIR/tse_iso.nii.gz $ASHS_WORK/mprage.nii.gz -reslice-identity -o $TMPDIR/mprage_to_tse_iso.nii.gz
 
+    echo "TMPDIR is "$TMPDIR", ASHS_WORK is "$ASHS_WORK", WFSL is "$WFSL", ASHS_FLIRT_MULTIMODAL_OPTS is "${ASHS_FLIRT_MULTIMODAL_OPTS}
+
     # Run flirt with T2 as reference (does it matter at this point?)
     flirt -v -ref $TMPDIR/tse_iso.nii.gz -in $TMPDIR/mprage_to_tse_iso.nii.gz \
       -omat $WFSL/flirt_intermediate.mat -cost normmi -dof 6 ${ASHS_FLIRT_MULTIMODAL_OPTS?}
