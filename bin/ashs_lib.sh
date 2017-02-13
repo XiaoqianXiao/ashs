@@ -66,7 +66,7 @@ function fake_qsub()
 
   bash $* 2>&1 | tee $ASHS_WORK/dump/${MYNAME}.o$(date +%Y%m%d_%H%M%S)
 
-  rm -rf $TMPDIR
+ # rm -rf $TMPDIR #by xxq
   TMPDIR=$PARENTTMPDIR
 }
 
